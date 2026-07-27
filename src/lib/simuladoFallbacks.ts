@@ -29,7 +29,7 @@ export function buildLocalSimulado(
     return {
       subject,
       complexity,
-      origin: "Vestibulares.ai",
+      origin: "Vestibulares.ai Local",
       correctIndex: 2,
       question: `(ENEM adaptada) Em uma rotina de preparacao para vestibular, o aluno revisou ${topic} em ${subject}. Qual estrategia e mais adequada para resolver uma questao de nivel ${complexity} sobre esse conteudo?`,
       options: [

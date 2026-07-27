@@ -1,5 +1,3 @@
-import { GoogleGenAI } from "@google/genai";
-
 type ApiResponse = {
   status: (code: number) => ApiResponse;
   json: (body: unknown) => void;
@@ -15,8 +13,6 @@ export type VercelResponse = ApiResponse;
 
 const MODEL = "gemini-3.5-flash";
 
-let ai: GoogleGenAI | null = null;
-
 export function methodNotAllowed(res: VercelResponse) {
   return res.status(405).json({ error: "Metodo nao permitido" });
 }
@@ -25,30 +21,41 @@ export function getBody(req: ApiRequest) {
   return typeof req.body === "object" && req.body ? req.body : {};
 }
 
-function getGemini() {
-  if (!ai) {
-    ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY || "MISSING_GEMINI_API_KEY"
-    });
-  }
-  return ai;
-}
-
 export function isAIAvailable() {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
 export async function generateText(prompt: string, json = false, temperature = 0.5) {
-  const response = await getGemini().models.generateContent({
-    model: MODEL,
-    contents: prompt,
-    config: {
-      temperature,
-      ...(json ? { responseMimeType: "application/json" } : {})
-    }
-  });
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured");
+  }
 
-  return response.text || "";
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature,
+          ...(json ? { responseMimeType: "application/json" } : {})
+        }
+      })
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`Gemini API failed with ${response.status}`);
+  }
+
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts
+    ?.map((part: { text?: string }) => part.text || "")
+    .join("");
+
+  return text || "";
 }
 
 export function parseJsonOrFallback<T>(text: string, fallback: T): T {
