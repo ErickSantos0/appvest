@@ -133,6 +133,21 @@ const ESSAY_THEMES = [
   "Os limites entre a liberdade de expressão e o discurso de ódio nas redes digitais brasileiras"
 ];
 
+const SUBJECT_NAME_ALIASES: Record<string, string> = {
+  "MatemÃ¡tica": "Matemática",
+  "Matem?tica": "Matemática",
+  "PortuguÃªs": "Português",
+  "Portugu?s": "Português",
+  "FÃ­sica": "Física",
+  "F?sica": "Física",
+  "HistÃ³ria": "História",
+  "Hist?ria": "História",
+  "QuÃ­mica": "Química",
+  "Qu?mica": "Química"
+};
+
+const getSubjectName = (name: string) => SUBJECT_NAME_ALIASES[name] || name;
+
 export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: SubjectSectionProps) {
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
@@ -157,6 +172,14 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
   const [essayText, setEssayText] = useState("");
   const [correctingEssay, setCorrectingEssay] = useState(false);
   const [essayResult, setEssayResult] = useState<EssayCorrection | null>(null);
+  const getPerformanceKey = (subjectName: string) => {
+    const normalizedSubjectName = getSubjectName(subjectName);
+    return Object.keys(user.performance).find(key => getSubjectName(key) === normalizedSubjectName) || normalizedSubjectName;
+  };
+  const subjectsForStudent = SUBJECTS.filter(subject => Object.prototype.hasOwnProperty.call(user.performance, getPerformanceKey(subject.name)));
+  const visibleSubjects = subjectsForStudent.length > 0 ? subjectsForStudent : SUBJECTS;
+  const selectedSubjectName = selectedSubject ? getSubjectName(selectedSubject.name) : "";
+  const selectedPerformanceKey = selectedSubject ? getPerformanceKey(selectedSubject.name) : "";
 
   const renderIcon = (name: string, className = "w-5 h-5") => {
     switch (name) {
@@ -180,7 +203,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        subject: selectedSubject.name,
+        subject: selectedSubjectName,
         concept: conceptStr,
         userMessage: customQuery
       })
@@ -217,7 +240,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        subject: selectedSubject.name,
+        subject: selectedSubjectName,
         topic: topicString
       })
     })
@@ -229,7 +252,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
         // Fallback mock questions in case of failure or empty response
         setQuizQuestions([
           {
-            question: `(ENEM) Em relação a matéria de ${selectedSubject.name}, considere que um estudante preparou um mapa mental detalhado sobre o tema de ${topicString}. Qual das alternativas representa uma verdade absoluta sobre o assunto?`,
+            question: `(ENEM) Em relação a matéria de ${selectedSubjectName}, considere que um estudante preparou um mapa mental detalhado sobre o tema de ${topicString}. Qual das alternativas representa uma verdade absoluta sobre o assunto?`,
             options: [
               "A) A teoria contraria todas as regras práticas vivenciadas.",
               "B) Trata-se de uma convenção estabelecida no século passado.",
@@ -280,8 +303,9 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
       setQuizFinished(true);
       // Increment subject score slightly based on correct answers
       const calcMultiplier = Math.round((correctAnswersCount / quizQuestions.length) * 10);
+      const currentScore = user.performance[selectedPerformanceKey] ?? 0;
       const performanceUpdate = {
-        [selectedSubject.name]: Math.min(100, (user.performance[selectedSubject.name] || 50) + calcMultiplier)
+        [selectedPerformanceKey]: Math.min(100, currentScore + calcMultiplier)
       };
       fetch("/api/user-profile", {
         method: "POST",
@@ -347,8 +371,9 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
 
           {/* Grid of subjects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {SUBJECTS.map((subj) => {
-              const score = user.performance[subj.name] || 0;
+            {visibleSubjects.map((subj) => {
+              const subjectName = getSubjectName(subj.name);
+              const score = user.performance[getPerformanceKey(subj.name)] ?? 0;
               return (
                 <div 
                   key={subj.id}
@@ -370,7 +395,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
                   </div>
 
                   <div className="space-y-2 mt-auto">
-                    <h3 className="text-lg font-display font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{subj.name}</h3>
+                    <h3 className="text-lg font-display font-bold text-slate-800 group-hover:text-indigo-600 transition-colors">{subjectName}</h3>
                     
                     {/* Progress score tracking */}
                     <div className="space-y-1">
@@ -429,9 +454,9 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
             </button>
             
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">Aproveitamento em {selectedSubject.name}:</span>
+              <span className="text-xs text-slate-500 font-medium">Aproveitamento em {selectedSubjectName}:</span>
               <span className="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-1 rounded-lg">
-                {user.performance[selectedSubject.name] || 50}%
+                {user.performance[selectedPerformanceKey] ?? 0}%
               </span>
             </div>
           </div>
@@ -441,7 +466,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
               {renderIcon(selectedSubject.icon, "w-7 h-7")}
             </div>
             <div>
-              <h2 className="text-2xl font-display font-bold text-slate-800">{selectedSubject.name}</h2>
+              <h2 className="text-2xl font-display font-bold text-slate-800">{selectedSubjectName}</h2>
               <p className="text-xs text-slate-550">Gerencie lições fundamentais, simulados e testes personalizados</p>
             </div>
           </div>
@@ -559,7 +584,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
                     
                     {/* Ask custom duda form */}
                     <div className="w-full max-w-md pt-4">
-                      <div className="text-xs text-slate-500 text-left mb-1.5 font-bold">Ficou com alguma dúvida pontual em {selectedSubject.name}?</div>
+                      <div className="text-xs text-slate-500 text-left mb-1.5 font-bold">Ficou com alguma dúvida pontual em {selectedSubjectName}?</div>
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -594,7 +619,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
                   <Calculator className="w-12 h-12 text-indigo-500/50" />
                   <div>
                     <h3 className="text-lg font-display font-bold text-slate-850">Gerador de Simulados Vestibular IA</h3>
-                    <p className="text-xs text-slate-500 mt-1 max-w-md">Escolha qual tópico de {selectedSubject.name} você quer testar agora de maneira interativa. Nossa IA formulará 3 questões exclusivas e corrigirá cada uma em tempo real!</p>
+                    <p className="text-xs text-slate-500 mt-1 max-w-md">Escolha qual tópico de {selectedSubjectName} você quer testar agora de maneira interativa. Nossa IA formulará 3 questões exclusivas e corrigirá cada uma em tempo real!</p>
                   </div>
                   
                   {/* Subject topic choices */}

@@ -75,6 +75,7 @@ export default function Dashboard({ user, onUpdateUser, onNavigateToTab, onOpenQ
 
   const nextReminder = user.reminders?.[0];
   const weakestSubject = Object.entries(user.performance).sort((a, b) => a[1] - b[1])[0];
+  const selectedSubjectNames = Object.keys(user.performance);
 
   return (
     <div className="space-y-2.5 md:space-y-4 animate-fade-in pb-2">
@@ -207,34 +208,34 @@ export default function Dashboard({ user, onUpdateUser, onNavigateToTab, onOpenQ
 
       <div className="grid grid-cols-2 gap-2 md:hidden">
         <button
-          onClick={() => setShowAddModal(true)}
-          className="bg-white border border-slate-200 p-3 rounded-xl text-left shadow-sm"
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-black text-slate-400">Proximo</span>
-            <Calendar className="w-4 h-4 text-indigo-600" />
-          </div>
-          <div className="text-xs font-bold text-slate-800 mt-2 leading-tight">
-            {nextReminder?.title || "Adicionar compromisso"}
-          </div>
-          <div className="text-[10px] text-slate-500 mt-1 leading-tight">
-            {nextReminder?.dateLabel || "Toque para agendar"}
-          </div>
-        </button>
-
-        <button
           onClick={() => onNavigateToTab("materias")}
           className="bg-white border border-slate-200 p-3 rounded-xl text-left shadow-sm"
         >
           <div className="flex items-center justify-between gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-black text-slate-400">Foco</span>
-            <TrendingUp className="w-4 h-4 text-amber-600" />
+            <span className="text-[10px] uppercase tracking-wider font-black text-slate-400">Estudar agora</span>
+            <TrendingUp className="w-4 h-4 text-indigo-600" />
           </div>
           <div className="text-xs font-bold text-slate-800 mt-2 leading-tight">
-            {weakestSubject?.[0] || "Materia"}
+            {weakestSubject?.[0] || selectedSubjectNames[0] || "Matérias"}
           </div>
           <div className="text-[10px] text-slate-500 mt-1 leading-tight">
-            {weakestSubject ? `${weakestSubject[1]}% de aproveitamento` : "Ver materias"}
+            Entrar nas aulas e exercícios
+          </div>
+        </button>
+
+        <button
+          onClick={() => onNavigateToTab("planejador")}
+          className="bg-white border border-slate-200 p-3 rounded-xl text-left shadow-sm"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-[10px] uppercase tracking-wider font-black text-slate-400">Plano semanal</span>
+            <Calendar className="w-4 h-4 text-amber-600" />
+          </div>
+          <div className="text-xs font-bold text-slate-800 mt-2 leading-tight">
+            Organizar rotina
+          </div>
+          <div className="text-[10px] text-slate-500 mt-1 leading-tight">
+            Gerar agenda de estudos
           </div>
         </button>
       </div>
@@ -291,7 +292,15 @@ export default function Dashboard({ user, onUpdateUser, onNavigateToTab, onOpenQ
                 </div>
               ))
             ) : (
-              <div className="text-center py-6 text-slate-400 text-xs">Nenhum compromisso agendado.</div>
+              <div className="text-center py-6 space-y-3">
+                <p className="text-slate-400 text-xs">Nenhum compromisso agendado ainda.</p>
+                <button
+                  onClick={() => onNavigateToTab("planejador")}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-4 py-2 rounded-xl transition"
+                >
+                  Gerar plano semanal
+                </button>
+              </div>
             )}
           </div>
         </div>

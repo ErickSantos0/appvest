@@ -41,12 +41,12 @@ interface GeneratedPlan {
 
 export default function StudyPlanner({ user, onUpdateUser, onNavigateToTab }: StudyPlannerProps) {
   const [hoursPerDay, setHoursPerDay] = useState<number>(4);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(["Matemática", "Química"]);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(Object.keys(user.performance).slice(0, 2));
   const [isGenerating, setIsGenerating] = useState(false);
   const [planResult, setPlanResult] = useState<GeneratedPlan | null>(null);
   const [savedToCalendar, setSavedToCalendar] = useState(false);
 
-  const availableSubjects = ["Matemática", "Português", "Física", "História", "Biologia", "Química"];
+  const availableSubjects = Object.keys(user.performance);
 
   const handleSubjectToggle = (subj: string) => {
     setSelectedSubjects(prev => 

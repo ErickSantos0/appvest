@@ -39,7 +39,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
   // Track correct/incorrect per subject for final feedback
   const [subjectPerformance, setSubjectPerformance] = useState<Record<string, { total: number, correct: number }>>({});
 
-  const availableSubjects = ["Matemática", "Português", "Física", "História", "Biologia", "Química"];
+  const availableSubjects = Object.keys(user.performance);
 
   // Find user's weakest subjects (under 55% average score)
   const weakSubjects = Object.entries(user.performance)
@@ -166,14 +166,14 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
       Object.entries(subjectPerformance as Record<string, { total: number; correct: number }>).forEach(([subjName, tracker]) => {
         const ratio = tracker.correct / tracker.total;
         // Raise performance if ratio is high, drop or adjust if very low
-        const currentScore = user.performance[subjName] || 50;
+        const currentScore = user.performance[subjName] ?? 0;
         let delta = 0;
         
         if (ratio >= 0.8) delta = Math.round(5 * ratio);
         else if (ratio <= 0.3) delta = -Math.round(4 * (1 - ratio));
         
         if (delta !== 0) {
-          performanceUpdate[subjName] = Math.max(10, Math.min(100, currentScore + delta));
+          performanceUpdate[subjName] = Math.max(0, Math.min(100, currentScore + delta));
         }
       });
 
