@@ -52,6 +52,8 @@ export interface FeedPost {
 }
 
 export interface PracticeQuestion {
+  subject?: string;
+  complexity?: string;
   question: string;
   options: string[];
   correctIndex: number;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { UserProfile, PracticeQuestion } from "../types";
+import { buildLocalSimulado } from "../lib/simuladoFallbacks";
 import { 
   ClipboardList, 
   Sparkles, 
@@ -64,6 +65,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
 
   const handleGenerateCustomSimulado = () => {
     const subjectsToFetch = selectedSubjects.length > 0 ? selectedSubjects : availableSubjects;
+    const fallbackQuestions = buildLocalSimulado(subjectsToFetch, numQuestions, complexity);
     
     setIsGenerating(true);
     setQuestions([]);
@@ -83,39 +85,20 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
         complexity: complexity
       })
     })
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) throw new Error("Simulado API unavailable");
+      return r.json();
+    })
     .then(data => {
-      if (data.questions && data.questions.length > 0) {
-        setQuestions(data.questions);
-      } else {
-        // Safe backend fallback questions in case of network timeout
-        setQuestions([
-          {
-            question: `Qual das seguintes opções reflete o comportamento típico de um sistema físico em equilíbrio térmico? (Nível: ${complexity})`,
-            options: [
-              "A) Duas partes possuem fluxos contrários contínuos de energia líquida.",
-              "B) Cessam as transições microscópicas de calor, mantendo idêntica energia cinética térmica média nas divisões.",
-              "C) Ocorre fusão adiabática instantânea nas fronteiras.",
-              "D) A pressão e o volume anulam-se isolamento.",
-              "E) Multiplica-se o calor latente exponencialmente."
-            ],
-            correctIndex: 1,
-            explanation: "O equilíbrio térmico é alcançado quando a troca de calor líquida cessa entre corpos em contato térmico, igualando suas temperaturas.",
-            origin: "Vestibulares Simulados",
-            complexity: complexity,
-            subject: selectedSubjects[0] || "Física"
-          }
-        ]);
-      }
+      setQuestions(data?.questions?.length ? data.questions : fallbackQuestions);
       setIsGenerating(false);
     })
     .catch(err => {
       console.error(err);
+      setQuestions(fallbackQuestions);
       setIsGenerating(false);
-      alert("Falha ao gerar o simulado adaptativo. Verifique sua conexão e tente novamente.");
     });
   };
-
   const handleRegisterAnswer = () => {
     if (selectedOption === null) return;
     setSubmitted(true);
@@ -501,3 +484,4 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
     </div>
   );
 }
+
