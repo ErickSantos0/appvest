@@ -13,19 +13,33 @@ import {
   Users, 
   User, 
   Sparkles, 
-  MessageSquare,
   BookOpen,
-  HelpCircle,
   Loader2,
   Calendar,
-  ClipboardList
+  ClipboardList,
+  CheckCircle
 } from "lucide-react";
+
+const SUBJECT_OPTIONS = ["Matemática", "Português", "Física", "Química", "Biologia", "História"];
+
+function calculateDaysLeft(examDate: string) {
+  if (!examDate) return 0;
+  const today = new Date();
+  const target = new Date(`${examDate}T12:00:00`);
+  today.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.ceil((target.getTime() - today.getTime()) / 86400000));
+}
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<string>("dashboard");
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [feed, setFeed] = useState<FeedPost[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [studentName, setStudentName] = useState("");
+  const [targetExam, setTargetExam] = useState("ENEM");
+  const [examDate, setExamDate] = useState("");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>(SUBJECT_OPTIONS);
+  const [savingOnboarding, setSavingOnboarding] = useState(false);
   
   // Floating AI Tutor chat panel state
   const [isAIChatOpen, setIsAIChatOpen] = useState<boolean>(false);
@@ -46,22 +60,25 @@ export default function App() {
       console.error("Initialization error:", err);
       // Fallback state if server key takes moments to restart
       setUserProfile({
-        name: "Erick",
-        target: "ENEM 2027",
-        targetDaysLeft: 184,
-        streakDays: 12,
+        name: "Aluno",
+        target: "Defina seu vestibular",
+        targetDaysLeft: 0,
+        streakDays: 0,
+        onboardingCompleted: false,
         stats: {
-          hoursStudied: "2h 45min",
-          exercisesSolved: 28,
-          dailyGoalPercent: 60,
-          aiChatsToday: 7
+          hoursStudied: "0h 00min",
+          exercisesSolved: 0,
+          dailyGoalPercent: 0,
+          aiChatsToday: 0
         },
         reminders: [],
         performance: {
-          "Matemática": 45,
-          "Português": 72,
-          "Física": 63,
-          "História": 58
+          "Matemática": 0,
+          "Português": 0,
+          "Física": 0,
+          "História": 0,
+          "Biologia": 0,
+          "Química": 0
         }
       });
       setLoading(false);
@@ -81,11 +98,152 @@ export default function App() {
     setIsAIChatOpen(true);
   };
 
+  const toggleOnboardingSubject = (subject: string) => {
+    setSelectedSubjects(prev =>
+      prev.includes(subject)
+        ? prev.filter(item => item !== subject)
+        : [...prev, subject]
+    );
+  };
+
+  const handleCompleteOnboarding = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!studentName.trim() || selectedSubjects.length === 0) return;
+
+    const performance = selectedSubjects.reduce<Record<string, number>>((acc, subject) => {
+      acc[subject] = 0;
+      return acc;
+    }, {});
+
+    setSavingOnboarding(true);
+
+    fetch("/api/user-profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: studentName.trim(),
+        target: targetExam.trim() || "Vestibular",
+        targetDaysLeft: calculateDaysLeft(examDate),
+        onboardingCompleted: true,
+        performance,
+        resetStats: true
+      })
+    })
+      .then(response => response.json())
+      .then(updated => {
+        setUserProfile(updated);
+        setActiveTab("dashboard");
+      })
+      .finally(() => setSavingOnboarding(false));
+  };
+
   if (loading || !userProfile) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col items-center justify-center space-y-4">
         <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
         <p className="text-xs text-slate-500 font-medium">Iniciando ambiente de estudos Vestibular IA...</p>
+      </div>
+    );
+  }
+
+  if (!userProfile.onboardingCompleted) {
+    return (
+      <div className="h-dvh bg-slate-50 text-slate-900 font-sans overflow-hidden flex flex-col">
+        <header className="border-b border-slate-200 bg-white px-4 py-3 shrink-0 shadow-sm">
+          <div className="max-w-3xl mx-auto flex items-center gap-2.5">
+            <div className="bg-indigo-600 p-2.5 rounded-xl text-white">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <div>
+              <span className="font-display font-bold text-sm tracking-tight text-slate-800 uppercase block leading-none">Vestibulares.ai</span>
+              <span className="text-[10px] block text-indigo-600 font-medium mt-1 font-mono">Cadastro do estudante</span>
+            </div>
+          </div>
+        </header>
+
+        <main className="flex-1 min-h-0 overflow-y-auto px-4 py-5">
+          <form onSubmit={handleCompleteOnboarding} className="max-w-3xl mx-auto bg-white border border-slate-200 rounded-2xl shadow-sm p-5 md:p-7 space-y-5">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-slate-900 leading-tight">
+                Vamos montar seu plano de estudos do zero
+              </h1>
+              <p className="text-sm text-slate-500 mt-2 leading-relaxed">
+                O desempenho começa em 0%. Conforme você estudar, resolver questões e gerar simulados, o app atualiza sua evolução.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <label className="space-y-1.5">
+                <span className="text-xs font-bold text-slate-600">Nome do aluno</span>
+                <input
+                  value={studentName}
+                  onChange={event => setStudentName(event.target.value)}
+                  placeholder="Ex: Erick"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  required
+                />
+              </label>
+
+              <label className="space-y-1.5">
+                <span className="text-xs font-bold text-slate-600">Vestibular alvo</span>
+                <input
+                  value={targetExam}
+                  onChange={event => setTargetExam(event.target.value)}
+                  placeholder="Ex: ENEM, FUVEST, UNICAMP"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                  required
+                />
+              </label>
+
+              <label className="space-y-1.5 md:col-span-2">
+                <span className="text-xs font-bold text-slate-600">Data prevista da prova</span>
+                <input
+                  type="date"
+                  value={examDate}
+                  onChange={event => setExamDate(event.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-indigo-500"
+                />
+              </label>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <h2 className="text-sm font-bold text-slate-800">Matérias que o aluno vai estudar</h2>
+                <p className="text-xs text-slate-500 mt-1">Todas as matérias selecionadas começam com 0% de aproveitamento.</p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
+                {SUBJECT_OPTIONS.map(subject => {
+                  const active = selectedSubjects.includes(subject);
+                  return (
+                    <button
+                      key={subject}
+                      type="button"
+                      onClick={() => toggleOnboardingSubject(subject)}
+                      className={`border rounded-xl px-3 py-3 text-left text-xs font-bold transition flex items-center justify-between gap-2 ${
+                        active
+                          ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                          : "bg-slate-50 border-slate-200 text-slate-500"
+                      }`}
+                    >
+                      <span>{subject}</span>
+                      {active && <CheckCircle className="w-4 h-4 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={savingOnboarding || selectedSubjects.length === 0}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-2xl py-3.5 text-sm font-bold transition flex items-center justify-center gap-2"
+            >
+              {savingOnboarding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              <span>Entrar no painel de estudos</span>
+            </button>
+          </form>
+        </main>
       </div>
     );
   }

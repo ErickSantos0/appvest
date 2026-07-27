@@ -14,28 +14,25 @@ app.use(express.json({ limit: "50mb" }));
 // In-memory Database for persistence during the development session
 const state = {
   user: {
-    name: "Erick",
-    target: "ENEM 2027",
-    targetDaysLeft: 184,
-    streakDays: 12,
+    name: "Aluno",
+    target: "Defina seu vestibular",
+    targetDaysLeft: 0,
+    streakDays: 0,
+    onboardingCompleted: false,
     stats: {
-      hoursStudied: "2h 45min",
-      exercisesSolved: 28,
-      dailyGoalPercent: 60,
-      aiChatsToday: 7
+      hoursStudied: "0h 00min",
+      exercisesSolved: 0,
+      dailyGoalPercent: 0,
+      aiChatsToday: 0
     },
-    reminders: [
-      { id: "1", title: "Simulado ENEM", datetime: "22 de Junho • 09:00", dateLabel: "Em 4 dias", type: "simulado" },
-      { id: "2", title: "Prova de Matemática", datetime: "25 de Junho • 14:00", dateLabel: "Em 7 dias", type: "prova" },
-      { id: "3", title: "Vestibular Fuvest", datetime: "15 de Novembro • 09:00", dateLabel: "Em 150 dias", type: "vestibular" }
-    ],
+    reminders: [],
     performance: {
-      "Matemática": 45,
-      "Português": 72,
-      "Física": 63,
-      "História": 58,
-      "Biologia": 52,
-      "Química": 40
+      "Matemática": 0,
+      "Português": 0,
+      "Física": 0,
+      "História": 0,
+      "Biologia": 0,
+      "Química": 0
     }
   },
   feed: [
@@ -615,12 +612,26 @@ app.get("/api/user-profile", (req, res) => {
 });
 
 app.post("/api/user-profile", (req, res) => {
-  const { name, target, targetDaysLeft, streakDays, reminder, performanceUpdate, incrementExercises, incrementChat } = req.body;
+  const { name, target, targetDaysLeft, streakDays, onboardingCompleted, performance, reminder, performanceUpdate, incrementExercises, incrementChat, resetStats } = req.body;
   
   if (name) state.user.name = name;
   if (target) state.user.target = target;
   if (Number.isFinite(Number(targetDaysLeft))) state.user.targetDaysLeft = Number(targetDaysLeft);
   if (Number.isFinite(Number(streakDays))) state.user.streakDays = Number(streakDays);
+  if (typeof onboardingCompleted === "boolean") state.user.onboardingCompleted = onboardingCompleted;
+  if (performance && typeof performance === "object") {
+    state.user.performance = performance;
+  }
+  if (resetStats) {
+    state.user.stats = {
+      hoursStudied: "0h 00min",
+      exercisesSolved: 0,
+      dailyGoalPercent: 0,
+      aiChatsToday: 0
+    };
+    state.user.streakDays = 0;
+    state.user.reminders = [];
+  }
   
   if (reminder) {
     // Add new custom study reminder

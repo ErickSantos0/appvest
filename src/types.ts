@@ -3,6 +3,7 @@ export interface UserProfile {
   target: string;
   targetDaysLeft: number;
   streakDays: number;
+  onboardingCompleted?: boolean;
   stats: {
     hoursStudied: string;
     exercisesSolved: number;
