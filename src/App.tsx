@@ -40,6 +40,7 @@ export default function App() {
   const [examDate, setExamDate] = useState("");
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>(SUBJECT_OPTIONS);
   const [savingOnboarding, setSavingOnboarding] = useState(false);
+  const [onboardingError, setOnboardingError] = useState("");
   
   // Floating AI Tutor chat panel state
   const [isAIChatOpen, setIsAIChatOpen] = useState<boolean>(false);
@@ -108,31 +109,58 @@ export default function App() {
 
   const handleCompleteOnboarding = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!studentName.trim() || selectedSubjects.length === 0) return;
+    if (!studentName.trim() || selectedSubjects.length === 0) {
+      setOnboardingError("Preencha o nome e selecione pelo menos uma matéria.");
+      return;
+    }
 
     const performance = selectedSubjects.reduce<Record<string, number>>((acc, subject) => {
       acc[subject] = 0;
       return acc;
     }, {});
+    const nextProfile: UserProfile = {
+      name: studentName.trim(),
+      target: targetExam.trim() || "Vestibular",
+      targetDaysLeft: calculateDaysLeft(examDate),
+      streakDays: 0,
+      onboardingCompleted: true,
+      stats: {
+        hoursStudied: "0h 00min",
+        exercisesSolved: 0,
+        dailyGoalPercent: 0,
+        aiChatsToday: 0
+      },
+      reminders: [],
+      performance
+    };
 
     setSavingOnboarding(true);
+    setOnboardingError("");
+    setUserProfile(nextProfile);
+    setActiveTab("dashboard");
 
     fetch("/api/user-profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: studentName.trim(),
-        target: targetExam.trim() || "Vestibular",
-        targetDaysLeft: calculateDaysLeft(examDate),
+        name: nextProfile.name,
+        target: nextProfile.target,
+        targetDaysLeft: nextProfile.targetDaysLeft,
         onboardingCompleted: true,
         performance,
         resetStats: true
       })
     })
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) throw new Error("Falha ao salvar cadastro");
+        return response.json();
+      })
       .then(updated => {
         setUserProfile(updated);
         setActiveTab("dashboard");
+      })
+      .catch(() => {
+        setOnboardingError("Você já entrou no painel. O cadastro será salvo quando o servidor responder.");
       })
       .finally(() => setSavingOnboarding(false));
   };
@@ -242,6 +270,11 @@ export default function App() {
               {savingOnboarding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
               <span>Entrar no painel de estudos</span>
             </button>
+            {onboardingError && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                {onboardingError}
+              </p>
+            )}
           </form>
         </main>
       </div>
