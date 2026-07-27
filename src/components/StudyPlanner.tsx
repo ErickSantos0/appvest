@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { UserProfile, StudyReminder } from "../types";
+import { buildLocalStudyPlan, GeneratedPlan, WeeklyDayPlan } from "../lib/studyFallbacks";
 import { 
   Calendar, 
   Clock, 
@@ -17,26 +18,6 @@ interface StudyPlannerProps {
   user: UserProfile;
   onUpdateUser: (data: Partial<UserProfile> | any) => void;
   onNavigateToTab: (tab: string) => void;
-}
-
-interface PlanActivity {
-  time: string;
-  subject: string;
-  topic: string;
-  type: string;
-  detail: string;
-  color?: string;
-}
-
-interface WeeklyDayPlan {
-  day: string;
-  activities: PlanActivity[];
-}
-
-interface GeneratedPlan {
-  summary: string;
-  weeklyPlan: WeeklyDayPlan[];
-  tips: string[];
 }
 
 export default function StudyPlanner({ user, onUpdateUser, onNavigateToTab }: StudyPlannerProps) {
@@ -64,6 +45,7 @@ export default function StudyPlanner({ user, onUpdateUser, onNavigateToTab }: St
     setIsGenerating(true);
     setPlanResult(null);
     setSavedToCalendar(false);
+    const fallbackPlan = buildLocalStudyPlan(hoursPerDay, selectedSubjects, user.performance);
 
     fetch("/api/gemini/generate-plan", {
       method: "POST",
@@ -74,9 +56,12 @@ export default function StudyPlanner({ user, onUpdateUser, onNavigateToTab }: St
         performance: user.performance
       })
     })
-    .then(r => r.json())
+    .then(r => {
+      if (!r.ok) throw new Error("Planner API unavailable");
+      return r.json();
+    })
     .then((data: GeneratedPlan) => {
-      setPlanResult(data);
+      setPlanResult(data?.weeklyPlan?.length ? data : fallbackPlan);
       setIsGenerating(false);
 
       // Increment AI Chat interactions to reward user dynamic progress
@@ -84,12 +69,12 @@ export default function StudyPlanner({ user, onUpdateUser, onNavigateToTab }: St
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ incrementChat: true })
-      }).then(r => r.json()).then(updated => onUpdateUser(updated));
+      }).then(r => r.json()).then(updated => onUpdateUser(updated)).catch(() => {});
     })
     .catch(err => {
       console.error("Error generating study plan:", err);
+      setPlanResult(fallbackPlan);
       setIsGenerating(false);
-      alert("Erro de comunicação com a IA. Por favor, tente novamente.");
     });
   };
 
