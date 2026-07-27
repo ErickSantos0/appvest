@@ -1,0 +1,6 @@
+{
+  "name": "Vestibular IA",
+  "description": "Aplicativo completo de preparação para vestibulares com simulados, controle de matérias, feed de comunidade e tutoria inteligente por inteligência artificial.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

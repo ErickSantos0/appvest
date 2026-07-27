@@ -1,0 +1,204 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+body {
+  background-color: #f8fafc; /* slate-50 */
+  color: #0f172a; /* slate-900 */
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+html {
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+img,
+video,
+canvas,
+svg {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+button,
+label,
+div {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fade-in 180ms ease-out both;
+  }
+
+  .animate-slide-in {
+    animation: slide-in 220ms ease-out both;
+  }
+
+  .shadow-xs {
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+  }
+
+  .p-4\.5 {
+    padding: 1.125rem;
+  }
+
+  .px-4\.5 {
+    padding-left: 1.125rem;
+    padding-right: 1.125rem;
+  }
+
+  .py-0\.2 {
+    padding-top: 0.05rem;
+    padding-bottom: 0.05rem;
+  }
+
+  .border-slate-105,
+  .border-slate-150 {
+    border-color: #e9eef5;
+  }
+
+  .border-slate-205,
+  .border-slate-350 {
+    border-color: #d8e0ea;
+  }
+
+  .border-indigo-150,
+  .border-indigo-250 {
+    border-color: #cfd7ff;
+  }
+
+  .border-emerald-450 {
+    border-color: #34d399;
+  }
+
+  .border-rose-105 {
+    border-color: #ffe4e6;
+  }
+
+  .bg-slate-55 {
+    background-color: #f8fafc;
+  }
+
+  .bg-slate-105,
+  .bg-slate-150 {
+    background-color: #eef2f7;
+  }
+
+  .bg-indigo-650,
+  .hover\:bg-indigo-505:hover {
+    background-color: #4f46e5;
+  }
+
+  .hover\:bg-indigo-505:hover,
+  .hover\:bg-indigo-500:hover {
+    background-color: #6366f1;
+  }
+
+  .text-slate-405,
+  .text-slate-450 {
+    color: #94a3b8;
+  }
+
+  .text-slate-550,
+  .text-slate-555,
+  .text-slate-605,
+  .text-slate-650 {
+    color: #475569;
+  }
+
+  .text-slate-705,
+  .text-slate-750,
+  .text-slate-805,
+  .text-slate-850 {
+    color: #1e293b;
+  }
+
+  .text-indigo-605,
+  .text-indigo-650,
+  .text-indigo-750,
+  .text-indigo-850 {
+    color: #4f46e5;
+  }
+
+  .text-amber-605,
+  .text-amber-705 {
+    color: #d97706;
+  }
+
+  .text-emerald-650 {
+    color: #059669;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9; /* slate-100 */
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8; /* slate-400 */
+}
