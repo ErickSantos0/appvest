@@ -81,16 +81,19 @@ export function isAIAvailable() {
 }
 
 export async function generateText(prompt, json = false, temperature = 0.5, useGoogleSearch = false) {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {

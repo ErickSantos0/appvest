@@ -25,7 +25,7 @@ interface AIPersonalizedSimuladoProps {
 export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateToTab }: AIPersonalizedSimuladoProps) {
   // Config state
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [numQuestions, setNumQuestions] = useState<number>(3);
+  const [numQuestions, setNumQuestions] = useState<number>(10);
   const [complexity, setComplexity] = useState<string>("Médio");
   
   // Quiz running state
@@ -264,7 +264,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
               <div className="space-y-2">
                 <span className="text-xs font-bold text-slate-600 block">Quantidade de Questões:</span>
                 <div className="grid grid-cols-3 gap-3">
-                  {[3, 5, 10].map(val => (
+                  {[10, 25, 40].map(val => (
                     <button
                       key={val}
                       onClick={() => setNumQuestions(val)}

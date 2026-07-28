@@ -5,7 +5,9 @@ export default async function handler(req, res) {
 
   const { subjects, numQuestions, complexity } = getBody(req);
   const chosen = Array.isArray(subjects) && subjects.length ? subjects : ["Matematica", "Portugues", "Biologia"];
-  const amount = Number(numQuestions || 3);
+  const allowedAmounts = [10, 25, 40];
+  const requestedAmount = Number(numQuestions || 10);
+  const amount = allowedAmounts.includes(requestedAmount) ? requestedAmount : 10;
   const fallback = buildPracticeQuestions(chosen[0], `${chosen.join(", ")} - ${complexity || "Medio"}`);
   fallback.questions = Array.from({ length: amount }, (_, index) => ({
     ...fallback.questions[index % fallback.questions.length],
