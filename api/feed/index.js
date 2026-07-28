@@ -1,13 +1,13 @@
-import { ApiRequest, VercelResponse, getBody, methodNotAllowed, state } from "../_shared";
+import { getBody, methodNotAllowed, state } from "../_shared.js";
 
-export default function handler(req: ApiRequest, res: VercelResponse) {
+export default function handler(req, res) {
   if (req.method === "GET") {
-    return res.json(state.feed);
+    return res.status(200).json(state.feed);
   }
 
   if (req.method === "POST") {
     const body = getBody(req);
-    const newPost: any = {
+    const newPost = {
       id: `feed_${Date.now()}`,
       user: {
         username: `${state.user.name.toLowerCase().replace(/\s/g, "")}_studa`,
@@ -33,7 +33,7 @@ export default function handler(req: ApiRequest, res: VercelResponse) {
     }
 
     state.feed.unshift(newPost);
-    return res.json(state.feed);
+    return res.status(200).json(state.feed);
   }
 
   return methodNotAllowed(res);

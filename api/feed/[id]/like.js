@@ -1,6 +1,6 @@
-import { ApiRequest, VercelResponse, methodNotAllowed, state } from "../../_shared";
+import { methodNotAllowed, state } from "../../_shared.js";
 
-export default function handler(req: ApiRequest, res: VercelResponse) {
+export default function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(res);
   }
@@ -14,5 +14,5 @@ export default function handler(req: ApiRequest, res: VercelResponse) {
 
   post.hasLiked = !post.hasLiked;
   post.likes += post.hasLiked ? 1 : -1;
-  return res.json(post);
+  return res.status(200).json(post);
 }

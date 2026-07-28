@@ -1,23 +1,78 @@
-type ApiResponse = {
-  status: (code: number) => ApiResponse;
-  json: (body: unknown) => void;
-};
-
-export type ApiRequest = {
-  method?: string;
-  body?: any;
-  query?: Record<string, string | string[]>;
-};
-
-export type VercelResponse = ApiResponse;
-
 const MODEL = "gemini-3.5-flash";
 
-export function methodNotAllowed(res: VercelResponse) {
+function createInitialState() {
+  return {
+    user: {
+      name: "Aluno",
+      target: "Defina seu vestibular",
+      targetDaysLeft: 0,
+      streakDays: 0,
+      onboardingCompleted: false,
+      stats: {
+        hoursStudied: "0h 00min",
+        exercisesSolved: 0,
+        dailyGoalPercent: 0,
+        aiChatsToday: 0
+      },
+      reminders: [],
+      performance: {
+        Matematica: 0,
+        Portugues: 0,
+        Fisica: 0,
+        Historia: 0,
+        Biologia: 0,
+        Quimica: 0
+      }
+    },
+    feed: [
+      {
+        id: "feed_1",
+        user: {
+          username: "julia_studa",
+          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+          badge: "ENEM"
+        },
+        timeAgo: "4h atras",
+        content: "Mantendo a constancia nos estudos. Hoje rendeu biologia, redacao e revisao dos erros.",
+        image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&q=80&w=800",
+        category: "Motivacao",
+        likes: 128,
+        hasLiked: false,
+        comments: [{ id: "c1", user: "mateus.foco", text: "Parabens! Constancia e tudo." }]
+      },
+      {
+        id: "feed_2",
+        user: {
+          username: "pedro.matematica",
+          avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+          badge: "MATEMATICA"
+        },
+        timeAgo: "3h atras",
+        content: "(ENEM) Considere f(x) = x^2 - 4x + 3. Qual e o valor de f(3) + f(1)?",
+        category: "Duvida",
+        isExercise: true,
+        exerciseData: {
+          subject: "Matematica",
+          equation: "f(x) = x^2 - 4x + 3. Valor de f(3) + f(1)?",
+          options: ["2", "4", "6", "8", "0"],
+          correctAnswer: "0"
+        },
+        likes: 45,
+        hasLiked: false,
+        comments: [{ id: "c2", user: "clara_study", text: "Substitui os valores: f(3)=0 e f(1)=0." }]
+      }
+    ]
+  };
+}
+
+export const state = globalThis.__APPVEST_STATE__ || createInitialState();
+globalThis.__APPVEST_STATE__ = state;
+
+export function methodNotAllowed(res) {
   return res.status(405).json({ error: "Metodo nao permitido" });
 }
 
-export function getBody(req: ApiRequest) {
+export function getBody(req) {
   return typeof req.body === "object" && req.body ? req.body : {};
 }
 
@@ -25,7 +80,7 @@ export function isAIAvailable() {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
-export async function generateText(prompt: string, json = false, temperature = 0.5) {
+export async function generateText(prompt, json = false, temperature = 0.5) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
@@ -51,89 +106,20 @@ export async function generateText(prompt: string, json = false, temperature = 0
   }
 
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts
-    ?.map((part: { text?: string }) => part.text || "")
-    .join("");
-
-  return text || "";
+  return data?.candidates?.[0]?.content?.parts
+    ?.map(part => part.text || "")
+    .join("") || "";
 }
 
-export function parseJsonOrFallback<T>(text: string, fallback: T): T {
+export function parseJsonOrFallback(text, fallback) {
   try {
-    return JSON.parse(text) as T;
+    return JSON.parse(text);
   } catch {
     return fallback;
   }
 }
 
-export const state = {
-  user: {
-    name: "Aluno",
-    target: "Defina seu vestibular",
-    targetDaysLeft: 0,
-    streakDays: 0,
-    onboardingCompleted: false,
-    stats: {
-      hoursStudied: "0h 00min",
-      exercisesSolved: 0,
-      dailyGoalPercent: 0,
-      aiChatsToday: 0
-    },
-    reminders: [] as any[],
-    performance: {
-      "Matematica": 0,
-      "Portugues": 0,
-      "Fisica": 0,
-      "Historia": 0,
-      "Biologia": 0,
-      "Quimica": 0
-    } as Record<string, number>
-  },
-  feed: [
-    {
-      id: "feed_1",
-      user: {
-        username: "julia_studa",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-        badge: "ENEM"
-      },
-      timeAgo: "4h atras",
-      content: "Mantendo a constancia nos estudos. Hoje rendeu biologia, redacao e revisao dos erros.",
-      image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&q=80&w=800",
-      category: "Motivacao",
-      likes: 128,
-      hasLiked: false,
-      comments: [
-        { id: "c1", user: "mateus.foco", text: "Parabens! Constancia e tudo." }
-      ]
-    },
-    {
-      id: "feed_2",
-      user: {
-        username: "pedro.matematica",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-        badge: "MATEMATICA"
-      },
-      timeAgo: "3h atras",
-      content: "(ENEM) Considere f(x) = x^2 - 4x + 3. Qual e o valor de f(3) + f(1)?",
-      category: "Duvida",
-      isExercise: true,
-      exerciseData: {
-        subject: "Matematica",
-        equation: "f(x) = x^2 - 4x + 3. Valor de f(3) + f(1)?",
-        options: ["2", "4", "6", "8", "0"],
-        correctAnswer: "0"
-      },
-      likes: 45,
-      hasLiked: false,
-      comments: [
-        { id: "c2", user: "clara_study", text: "Substitui os valores: f(3)=0 e f(1)=0." }
-      ]
-    }
-  ] as any[]
-};
-
-export function updateUser(body: any) {
+export function updateUser(body) {
   const user = state.user;
 
   if (body.name) user.name = String(body.name);
@@ -272,7 +258,7 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
   };
 }
 
-export function buildStudyPlan(hoursPerDay = 4, focusSubjects: string[] = [], performance: Record<string, number> = {}) {
+export function buildStudyPlan(hoursPerDay = 4, focusSubjects = [], performance = {}) {
   const days = ["Segunda-feira", "Terca-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sabado", "Domingo"];
   const subjects = focusSubjects.length ? focusSubjects : Object.keys(performance);
   const usableSubjects = subjects.length ? subjects : ["Redacao"];

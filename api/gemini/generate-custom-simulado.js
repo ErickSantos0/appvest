@@ -1,6 +1,6 @@
-import { ApiRequest, VercelResponse, buildPracticeQuestions, generateText, getBody, isAIAvailable, methodNotAllowed, parseJsonOrFallback } from "../_shared";
+import { buildPracticeQuestions, generateText, getBody, isAIAvailable, methodNotAllowed, parseJsonOrFallback } from "../_shared.js";
 
-export default async function handler(req: ApiRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
   const { subjects, numQuestions, complexity } = getBody(req);
@@ -15,7 +15,7 @@ export default async function handler(req: ApiRequest, res: VercelResponse) {
 
   try {
     if (!isAIAvailable()) {
-      return res.json(fallback);
+      return res.status(200).json(fallback);
     }
 
     const prompt = `Gere um simulado personalizado em portugues com exatamente ${amount} questoes.
@@ -23,24 +23,11 @@ Materias: ${chosen.join(", ")}.
 Nivel: ${complexity || "Medio"}.
 Estilo: ENEM, FUVEST e vestibulares brasileiros.
 Cada questao deve ter 5 alternativas e somente uma correta.
-Retorne somente JSON valido:
-{
-  "questions": [
-    {
-      "subject": "Matematica",
-      "question": "...",
-      "options": ["A) ...", "B) ...", "C) ...", "D) ...", "E) ..."],
-      "correctIndex": 0,
-      "explanation": "...",
-      "origin": "ENEM Adaptada",
-      "complexity": "${complexity || "Medio"}"
-    }
-  ]
-}`;
+Retorne somente JSON valido no formato {"questions":[{"subject":"Matematica","question":"...","options":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correctIndex":0,"explanation":"...","origin":"ENEM Adaptada","complexity":"${complexity || "Medio"}"}]}`;
 
     const text = await generateText(prompt, true, 0.5);
-    return res.json(parseJsonOrFallback(text, fallback));
+    return res.status(200).json(parseJsonOrFallback(text, fallback));
   } catch {
-    return res.json(fallback);
+    return res.status(200).json(fallback);
   }
 }

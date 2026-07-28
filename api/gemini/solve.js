@@ -1,13 +1,13 @@
-import { ApiRequest, VercelResponse, buildSolveFallback, generateText, getBody, isAIAvailable, methodNotAllowed } from "../_shared";
+import { buildSolveFallback, generateText, getBody, isAIAvailable, methodNotAllowed } from "../_shared.js";
 
-export default async function handler(req: ApiRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
   const { exerciseContext } = getBody(req);
 
   try {
     if (!isAIAvailable()) {
-      return res.json({ text: buildSolveFallback(exerciseContext) });
+      return res.status(200).json({ text: buildSolveFallback(exerciseContext) });
     }
 
     const prompt = `Resolva a questao de vestibular abaixo em portugues, com Markdown.
@@ -17,8 +17,8 @@ Questao:
 ${exerciseContext}`;
 
     const text = await generateText(prompt, false, 0.3);
-    return res.json({ text });
+    return res.status(200).json({ text });
   } catch {
-    return res.json({ text: buildSolveFallback(exerciseContext) });
+    return res.status(200).json({ text: buildSolveFallback(exerciseContext) });
   }
 }

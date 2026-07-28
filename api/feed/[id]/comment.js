@@ -1,6 +1,6 @@
-import { ApiRequest, VercelResponse, getBody, methodNotAllowed, state } from "../../_shared";
+import { getBody, methodNotAllowed, state } from "../../_shared.js";
 
-export default function handler(req: ApiRequest, res: VercelResponse) {
+export default function handler(req, res) {
   if (req.method !== "POST") {
     return methodNotAllowed(res);
   }
@@ -19,5 +19,5 @@ export default function handler(req: ApiRequest, res: VercelResponse) {
     text: body.text
   });
 
-  return res.json(post);
+  return res.status(200).json(post);
 }

@@ -1,13 +1,13 @@
-import { ApiRequest, VercelResponse, buildExplainFallback, generateText, getBody, isAIAvailable, methodNotAllowed } from "../_shared";
+import { buildExplainFallback, generateText, getBody, isAIAvailable, methodNotAllowed } from "../_shared.js";
 
-export default async function handler(req: ApiRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
   const { subject, concept, userMessage } = getBody(req);
 
   try {
     if (!isAIAvailable()) {
-      return res.json({ text: buildExplainFallback(subject, concept, userMessage) });
+      return res.status(200).json({ text: buildExplainFallback(subject, concept, userMessage) });
     }
 
     const prompt = `Voce e o VestibularTutor, uma IA especialista em ENEM e vestibulares brasileiros.
@@ -24,8 +24,8 @@ Formato:
 5. Recursos ou formas de estudar`;
 
     const text = await generateText(prompt, false, 0.7);
-    return res.json({ text });
+    return res.status(200).json({ text });
   } catch {
-    return res.json({ text: buildExplainFallback(subject, concept, userMessage) });
+    return res.status(200).json({ text: buildExplainFallback(subject, concept, userMessage) });
   }
 }
