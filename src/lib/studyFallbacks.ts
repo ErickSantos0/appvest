@@ -36,7 +36,14 @@ const TOPICS_BY_SUBJECT: Record<string, string[]> = {
   "Biologia": ["Ecologia", "Genetica", "Fisiologia humana"],
   "História": ["Brasil Colonia", "Era Vargas", "Guerra Fria"],
   "Geografia": ["Cartografia", "Climatologia", "Geopolitica"],
-  "Redação": ["Tese e repertorio", "Desenvolvimento", "Proposta de intervencao"]
+  "Redação": ["Tese e repertorio", "Desenvolvimento", "Proposta de intervencao"],
+  "Literatura": ["Escolas literarias", "Modernismo", "Analise de obras"],
+  "Filosofia": ["Filosofia antiga", "Etica", "Teoria do conhecimento"],
+  "Sociologia": ["Classicos da sociologia", "Cultura e identidade", "Trabalho e sociedade"],
+  "Inglês": ["Interpretacao textual", "Cognatos", "Conectores"],
+  "Espanhol": ["Comprension lectora", "Heterossemanticos", "Marcadores discursivos"],
+  "Artes": ["Historia da arte", "Arte brasileira", "Leitura de imagem"],
+  "Educação Física": ["Saude e qualidade de vida", "Esportes e sociedade", "Corpo e cultura"]
 };
 
 export function buildLocalStudyPlan(

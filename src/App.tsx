@@ -7,6 +7,7 @@ import ProfileSection from "./components/ProfileSection";
 import AIAssistantOverlay from "./components/AIAssistantOverlay";
 import StudyPlanner from "./components/StudyPlanner";
 import AIPersonalizedSimulado from "./components/AIPersonalizedSimulado";
+import { SUBJECT_OPTIONS, normalizePerformanceSubjects } from "./lib/subjects";
 import { 
   LayoutDashboard, 
   BookMarked, 
@@ -20,14 +21,19 @@ import {
   CheckCircle
 } from "lucide-react";
 
-const SUBJECT_OPTIONS = ["Matemática", "Português", "Física", "Química", "Biologia", "História"];
-
 function calculateDaysLeft(examDate: string) {
   if (!examDate) return 0;
   const today = new Date();
   const target = new Date(`${examDate}T12:00:00`);
   today.setHours(0, 0, 0, 0);
   return Math.max(0, Math.ceil((target.getTime() - today.getTime()) / 86400000));
+}
+
+function normalizeUserProfile(profile: UserProfile): UserProfile {
+  return {
+    ...profile,
+    performance: normalizePerformanceSubjects(profile.performance)
+  };
 }
 
 export default function App() {
@@ -53,7 +59,7 @@ export default function App() {
       fetch("/api/feed").then(r => r.json())
     ])
     .then(([profileData, feedData]) => {
-      setUserProfile(profileData);
+      setUserProfile(normalizeUserProfile(profileData));
       setFeed(feedData);
       setLoading(false);
     })
@@ -73,21 +79,14 @@ export default function App() {
           aiChatsToday: 0
         },
         reminders: [],
-        performance: {
-          "Matemática": 0,
-          "Português": 0,
-          "Física": 0,
-          "História": 0,
-          "Biologia": 0,
-          "Química": 0
-        }
+        performance: normalizePerformanceSubjects()
       });
       setLoading(false);
     });
   }, []);
 
   const handleUpdateUserProfile = (updated: UserProfile) => {
-    setUserProfile(updated);
+    setUserProfile(normalizeUserProfile(updated));
   };
 
   const handleUpdateFeed = (updatedFeed: FeedPost[]) => {
@@ -156,7 +155,7 @@ export default function App() {
         return response.json();
       })
       .then(updated => {
-        setUserProfile(updated);
+        setUserProfile(normalizeUserProfile(updated));
         setActiveTab("dashboard");
       })
       .catch(() => {

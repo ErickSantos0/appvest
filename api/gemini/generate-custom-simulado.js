@@ -1,10 +1,28 @@
 import { generateText, getBody, isAIAvailable, methodNotAllowed, parseJsonOrFallback } from "../_shared.js";
 
+const DEFAULT_SUBJECTS = [
+  "Matemática",
+  "Português",
+  "Redação",
+  "Literatura",
+  "Física",
+  "Química",
+  "Biologia",
+  "História",
+  "Geografia",
+  "Filosofia",
+  "Sociologia",
+  "Inglês",
+  "Espanhol",
+  "Artes",
+  "Educação Física"
+];
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
   const { subjects, numQuestions, complexity, debug } = getBody(req);
-  const chosen = Array.isArray(subjects) && subjects.length ? subjects : ["Matematica", "Portugues", "Biologia"];
+  const chosen = Array.isArray(subjects) && subjects.length ? subjects : DEFAULT_SUBJECTS;
   const allowedAmounts = [10, 25, 40];
   const requestedAmount = Number(numQuestions || 10);
   const amount = allowedAmounts.includes(requestedAmount) ? requestedAmount : 10;
@@ -34,7 +52,7 @@ Regra obrigatoria:
 - A explicacao deve ensinar o raciocinio e citar por que a alternativa correta vence as demais.
 
 Retorne somente JSON valido no formato:
-{"questions":[{"subject":"Matematica","exam":"ENEM","year":2023,"appliedDate":"05/11/2023","sourceUrl":"https://...","isRealQuestion":true,"question":"...","options":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correctIndex":0,"explanation":"...","origin":"ENEM 2023 - 05/11/2023","complexity":"${complexity || "Medio"}"}],"error":""}`;
+{"questions":[{"subject":"Matemática","exam":"ENEM","year":2023,"appliedDate":"05/11/2023","sourceUrl":"https://...","isRealQuestion":true,"question":"...","options":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correctIndex":0,"explanation":"...","origin":"ENEM 2023 - 05/11/2023","complexity":"${complexity || "Medio"}"}],"error":""}`;
 
   const normalizeResponse = (payload) => {
     const sourceQuestions = Array.isArray(payload?.questions) ? payload.questions : [];

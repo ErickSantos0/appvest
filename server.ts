@@ -29,10 +29,19 @@ const state = {
     performance: {
       "Matemática": 0,
       "Português": 0,
+      "Redação": 0,
+      "Literatura": 0,
       "Física": 0,
-      "História": 0,
+      "Química": 0,
       "Biologia": 0,
-      "Química": 0
+      "História": 0,
+      "Geografia": 0,
+      "Filosofia": 0,
+      "Sociologia": 0,
+      "Inglês": 0,
+      "Espanhol": 0,
+      "Artes": 0,
+      "Educação Física": 0
     }
   },
   feed: [

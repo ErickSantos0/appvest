@@ -22,8 +22,14 @@ import {
   RefreshCw,
   Clock,
   ThumbsUp,
-  FileText
+  FileText,
+  Globe2,
+  Languages,
+  Palette,
+  Activity,
+  Users
 } from "lucide-react";
+import { getCanonicalSubjectName } from "../lib/subjects";
 
 interface SubjectSectionProps {
   user: UserProfile;
@@ -122,6 +128,141 @@ const SUBJECTS = [
       { title: "Química Orgânica", concepts: ["Hidrocarbonetos", "Álcool, Éter e Ácidos Carboxílicos", "Isomeria Plana e Espacial"] },
       { title: "Equilíbrio Químico", concepts: ["Constante de Equilíbrio Kc e Kp", "Princípio de Le Chatelier", "pH e pOH"] }
     ]
+  },
+  {
+    id: "red",
+    name: "Redação",
+    icon: "essay",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-rose-300 hover:shadow-md",
+    badgeColor: "bg-rose-50 text-rose-700 border-rose-100",
+    barColor: "bg-rose-600",
+    topics: [
+      { title: "Estrutura Dissertativo-Argumentativa", concepts: ["Tese clara", "Projeto de texto", "Introdução, desenvolvimento e conclusão"] },
+      { title: "Competências do ENEM", concepts: ["Norma culta", "Compreensão do tema", "Coesão textual", "Proposta de intervenção"] },
+      { title: "Repertório Sociocultural", concepts: ["Citações produtivas", "Dados oficiais", "Filmes, livros e fatos históricos"] },
+      { title: "Proposta de Intervenção", concepts: ["Agente", "Ação", "Meio", "Finalidade", "Detalhamento"] }
+    ]
+  },
+  {
+    id: "lit",
+    name: "Literatura",
+    icon: "literature",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-fuchsia-300 hover:shadow-md",
+    badgeColor: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-100",
+    barColor: "bg-fuchsia-600",
+    topics: [
+      { title: "Escolas Literárias", concepts: ["Barroco", "Arcadismo", "Romantismo", "Realismo", "Modernismo"] },
+      { title: "Modernismo Brasileiro", concepts: ["Semana de 1922", "Geração de 30", "Poesia moderna"] },
+      { title: "Análise de Texto Literário", concepts: ["Eu lírico", "Narrador", "Figuras de linguagem", "Intertextualidade"] },
+      { title: "Obras Cobradas", concepts: ["Contexto histórico", "Personagens", "Temas centrais", "Estilo do autor"] }
+    ]
+  },
+  {
+    id: "geo",
+    name: "Geografia",
+    icon: "geography",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-cyan-300 hover:shadow-md",
+    badgeColor: "bg-cyan-50 text-cyan-700 border-cyan-100",
+    barColor: "bg-cyan-600",
+    topics: [
+      { title: "Cartografia e Escalas", concepts: ["Coordenadas geográficas", "Fusos horários", "Projeções", "Escala cartográfica"] },
+      { title: "Climatologia", concepts: ["Massas de ar", "Tipos climáticos", "Efeito estufa", "Ilhas de calor"] },
+      { title: "Geopolítica", concepts: ["Globalização", "Blocos econômicos", "Conflitos territoriais", "Nova ordem mundial"] },
+      { title: "Geografia do Brasil", concepts: ["Urbanização", "Agropecuária", "Matriz energética", "Domínios morfoclimáticos"] }
+    ]
+  },
+  {
+    id: "filo",
+    name: "Filosofia",
+    icon: "philosophy",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-violet-300 hover:shadow-md",
+    badgeColor: "bg-violet-50 text-violet-700 border-violet-100",
+    barColor: "bg-violet-600",
+    topics: [
+      { title: "Filosofia Antiga", concepts: ["Sócrates", "Platão", "Aristóteles", "Ética e política"] },
+      { title: "Filosofia Moderna", concepts: ["Racionalismo", "Empirismo", "Iluminismo", "Contrato social"] },
+      { title: "Ética e Cidadania", concepts: ["Moral", "Liberdade", "Justiça", "Direitos humanos"] },
+      { title: "Teoria do Conhecimento", concepts: ["Senso comum", "Ciência", "Verdade", "Método"] }
+    ]
+  },
+  {
+    id: "socio",
+    name: "Sociologia",
+    icon: "sociology",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-sky-300 hover:shadow-md",
+    badgeColor: "bg-sky-50 text-sky-700 border-sky-100",
+    barColor: "bg-sky-600",
+    topics: [
+      { title: "Clássicos da Sociologia", concepts: ["Durkheim", "Weber", "Marx", "Fato social"] },
+      { title: "Cultura e Identidade", concepts: ["Etnocentrismo", "Relativismo cultural", "Indústria cultural", "Diversidade"] },
+      { title: "Trabalho e Sociedade", concepts: ["Fordismo", "Toyotismo", "Precarização", "Desigualdade social"] },
+      { title: "Cidadania e Movimentos Sociais", concepts: ["Participação política", "Direitos civis", "Direitos sociais", "Democracia"] }
+    ]
+  },
+  {
+    id: "ing",
+    name: "Inglês",
+    icon: "languages",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-lime-300 hover:shadow-md",
+    badgeColor: "bg-lime-50 text-lime-700 border-lime-100",
+    barColor: "bg-lime-600",
+    topics: [
+      { title: "Reading Comprehension", concepts: ["Skimming", "Scanning", "Cognatos", "Inferência contextual"] },
+      { title: "Text Genres", concepts: ["News", "Ads", "Cartoons", "Scientific texts"] },
+      { title: "Grammar in Context", concepts: ["Verb tenses", "Pronouns", "Modal verbs", "Connectors"] },
+      { title: "Vocabulary", concepts: ["False friends", "Phrasal verbs", "Word formation", "Synonyms"] }
+    ]
+  },
+  {
+    id: "esp",
+    name: "Espanhol",
+    icon: "languages",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-orange-300 hover:shadow-md",
+    badgeColor: "bg-orange-50 text-orange-700 border-orange-100",
+    barColor: "bg-orange-600",
+    topics: [
+      { title: "Comprensión Lectora", concepts: ["Idea principal", "Inferência", "Cognatos", "Marcadores discursivos"] },
+      { title: "Gêneros Textuais", concepts: ["Notícia", "Charge", "Propaganda", "Texto literário"] },
+      { title: "Gramática em Contexto", concepts: ["Pronomes", "Tempos verbais", "Artigos", "Conectores"] },
+      { title: "Vocabulário", concepts: ["Heterossemânticos", "Expressões idiomáticas", "Sinônimos", "Variação linguística"] }
+    ]
+  },
+  {
+    id: "art",
+    name: "Artes",
+    icon: "arts",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-pink-300 hover:shadow-md",
+    badgeColor: "bg-pink-50 text-pink-700 border-pink-100",
+    barColor: "bg-pink-600",
+    topics: [
+      { title: "História da Arte", concepts: ["Renascimento", "Barroco", "Modernismo", "Arte contemporânea"] },
+      { title: "Linguagens Artísticas", concepts: ["Música", "Teatro", "Dança", "Artes visuais"] },
+      { title: "Arte Brasileira", concepts: ["Semana de 1922", "Tarsila do Amaral", "Tropicália", "Cinema novo"] },
+      { title: "Leitura de Imagem", concepts: ["Composição", "Cor", "Contexto", "Crítica cultural"] }
+    ]
+  },
+  {
+    id: "edf",
+    name: "Educação Física",
+    icon: "sports",
+    color: "bg-white text-slate-800 border-slate-200",
+    hoverBg: "hover:border-green-300 hover:shadow-md",
+    badgeColor: "bg-green-50 text-green-700 border-green-100",
+    barColor: "bg-green-600",
+    topics: [
+      { title: "Saúde e Qualidade de Vida", concepts: ["Sedentarismo", "Atividade física", "Alimentação", "Saúde mental"] },
+      { title: "Esportes e Sociedade", concepts: ["Inclusão", "Regras", "Mídia esportiva", "Megaeventos"] },
+      { title: "Corpo e Cultura", concepts: ["Padrões corporais", "Dança", "Lutas", "Jogos populares"] },
+      { title: "Fisiologia do Exercício", concepts: ["Capacidades físicas", "Treinamento", "Lesões", "Alongamento"] }
+    ]
   }
 ];
 
@@ -133,20 +274,7 @@ const ESSAY_THEMES = [
   "Os limites entre a liberdade de expressão e o discurso de ódio nas redes digitais brasileiras"
 ];
 
-const SUBJECT_NAME_ALIASES: Record<string, string> = {
-  "MatemÃ¡tica": "Matemática",
-  "Matem?tica": "Matemática",
-  "PortuguÃªs": "Português",
-  "Portugu?s": "Português",
-  "FÃ­sica": "Física",
-  "F?sica": "Física",
-  "HistÃ³ria": "História",
-  "Hist?ria": "História",
-  "QuÃ­mica": "Química",
-  "Qu?mica": "Química"
-};
-
-const getSubjectName = (name: string) => SUBJECT_NAME_ALIASES[name] || name;
+const getSubjectName = getCanonicalSubjectName;
 
 export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: SubjectSectionProps) {
   const [selectedSubject, setSelectedSubject] = useState<any | null>(null);
@@ -176,8 +304,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
     const normalizedSubjectName = getSubjectName(subjectName);
     return Object.keys(user.performance).find(key => getSubjectName(key) === normalizedSubjectName) || normalizedSubjectName;
   };
-  const subjectsForStudent = SUBJECTS.filter(subject => Object.prototype.hasOwnProperty.call(user.performance, getPerformanceKey(subject.name)));
-  const visibleSubjects = subjectsForStudent.length > 0 ? subjectsForStudent : SUBJECTS;
+  const visibleSubjects = SUBJECTS;
   const selectedSubjectName = selectedSubject ? getSubjectName(selectedSubject.name) : "";
   const selectedPerformanceKey = selectedSubject ? getPerformanceKey(selectedSubject.name) : "";
 
@@ -189,6 +316,14 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
       case "history": return <Building className={className} />;
       case "biology": return <Dna className={className} />;
       case "chemistry": return <FlaskConical className={className} />;
+      case "geography": return <Globe2 className={className} />;
+      case "essay": return <PenTool className={className} />;
+      case "literature": return <BookMarked className={className} />;
+      case "philosophy": return <HelpCircle className={className} />;
+      case "sociology": return <Users className={className} />;
+      case "languages": return <Languages className={className} />;
+      case "arts": return <Palette className={className} />;
+      case "sports": return <Activity className={className} />;
       default: return <BookOpen className={className} />;
     }
   };
@@ -427,7 +562,7 @@ export default function SubjectSection({ user, onUpdateUser, onOpenQuickAI }: Su
             
             <button 
               onClick={() => {
-                const redSubject = SUBJECTS.find(s => s.id === "port");
+                const redSubject = SUBJECTS.find(s => s.id === "red") || SUBJECTS.find(s => s.id === "port");
                 setSelectedSubject(redSubject || SUBJECTS[1]);
                 setSelectedConcept(null);
                 setExplainResult(null);

@@ -16,12 +16,21 @@ function createInitialState() {
       },
       reminders: [],
       performance: {
-        Matematica: 0,
-        Portugues: 0,
-        Fisica: 0,
-        Historia: 0,
-        Biologia: 0,
-        Quimica: 0
+        "Matemática": 0,
+        "Português": 0,
+        "Redação": 0,
+        "Literatura": 0,
+        "Física": 0,
+        "Química": 0,
+        "Biologia": 0,
+        "História": 0,
+        "Geografia": 0,
+        "Filosofia": 0,
+        "Sociologia": 0,
+        "Inglês": 0,
+        "Espanhol": 0,
+        "Artes": 0,
+        "Educação Física": 0
       }
     },
     feed: [

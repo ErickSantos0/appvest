@@ -318,9 +318,19 @@ export default function Dashboard({ user, onUpdateUser, onNavigateToTab, onOpenQ
               const colorClass = 
                 subj === "Matemática" ? "bg-indigo-600" :
                 subj === "Português" ? "bg-emerald-500" :
+                subj === "Redação" ? "bg-rose-500" :
+                subj === "Literatura" ? "bg-fuchsia-500" :
                 subj === "Física" ? "bg-blue-500" :
+                subj === "Química" ? "bg-red-500" :
                 subj === "História" ? "bg-amber-500" :
-                subj === "Biologia" ? "bg-teal-500" : "bg-red-500";
+                subj === "Biologia" ? "bg-teal-500" :
+                subj === "Geografia" ? "bg-cyan-500" :
+                subj === "Filosofia" ? "bg-violet-500" :
+                subj === "Sociologia" ? "bg-sky-500" :
+                subj === "Inglês" ? "bg-lime-500" :
+                subj === "Espanhol" ? "bg-orange-500" :
+                subj === "Artes" ? "bg-pink-500" :
+                subj === "Educação Física" ? "bg-green-500" : "bg-slate-500";
 
               return (
                 <div key={subj} className="space-y-1.5">
