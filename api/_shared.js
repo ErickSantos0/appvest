@@ -106,7 +106,8 @@ export async function generateText(prompt, json = false, temperature = 0.5, useG
   );
 
   if (!response.ok) {
-    throw new Error(`Gemini API failed with ${response.status}`);
+    const errorText = await response.text().catch(() => "");
+    throw new Error(`Gemini API failed with ${response.status}: ${errorText.slice(0, 500)}`);
   }
 
   const data = await response.json();

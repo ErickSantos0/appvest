@@ -3,7 +3,7 @@ import { buildPracticeQuestions, generateText, getBody, isAIAvailable, methodNot
 export default async function handler(req, res) {
   if (req.method !== "POST") return methodNotAllowed(res);
 
-  const { subjects, numQuestions, complexity } = getBody(req);
+  const { subjects, numQuestions, complexity, debug } = getBody(req);
   const chosen = Array.isArray(subjects) && subjects.length ? subjects : ["Matematica", "Portugues", "Biologia"];
   const allowedAmounts = [10, 25, 40];
   const requestedAmount = Number(numQuestions || 10);
@@ -42,7 +42,21 @@ Retorne somente JSON valido no formato:
 
     const text = await generateText(prompt, true, 0.5, true);
     return res.status(200).json(parseJsonOrFallback(text, fallback));
-  } catch {
-    return res.status(200).json(fallback);
+  } catch (searchError) {
+    try {
+      const text = await generateText(prompt, true, 0.5, false);
+      const data = parseJsonOrFallback(text, fallback);
+      if (debug) data.debug = { groundedSearchError: searchError.message, fallbackUsed: false };
+      return res.status(200).json(data);
+    } catch (plainError) {
+      if (debug) {
+        fallback.debug = {
+          groundedSearchError: searchError.message,
+          plainGeminiError: plainError.message,
+          fallbackUsed: true
+        };
+      }
+      return res.status(200).json(fallback);
+    }
   }
 }
