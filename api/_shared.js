@@ -80,40 +80,56 @@ export function isAIAvailable() {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export async function generateText(prompt, json = false, temperature = 0.5, useGoogleSearch = false) {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature,
-          ...(json ? { responseMimeType: "application/json" } : {})
-        },
-        ...(useGoogleSearch ? { tools: [{ google_search: {} }] } : {})
-      })
-    }
-  );
+  let lastError = null;
 
-  if (!response.ok) {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": apiKey
+        },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature,
+            ...(json ? { responseMimeType: "application/json" } : {})
+          },
+          ...(useGoogleSearch ? { tools: [{ google_search: {} }] } : {})
+        })
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      return data?.candidates?.[0]?.content?.parts
+        ?.map(part => part.text || "")
+        .join("") || "";
+    }
+
     const errorText = await response.text().catch(() => "");
-    throw new Error(`Gemini API failed with ${response.status}: ${errorText.slice(0, 500)}`);
+    lastError = new Error(`Gemini API failed with ${response.status}: ${errorText.slice(0, 500)}`);
+
+    if (response.status !== 503 || attempt === 2) {
+      throw lastError;
+    }
+
+    await wait(800 * (attempt + 1));
   }
 
-  const data = await response.json();
-  return data?.candidates?.[0]?.content?.parts
-    ?.map(part => part.text || "")
-    .join("") || "";
+  throw lastError || new Error("Gemini API failed");
 }
 
 export function parseJsonOrFallback(text, fallback) {
