@@ -150,6 +150,45 @@ export function parseJsonOrFallback(text, fallback) {
   }
 }
 
+const OPTION_PREFIXES = ["A)", "B)", "C)", "D)", "E)"];
+const CORRECT_INDEX_SEQUENCE = [0, 3, 1, 4, 2];
+
+function stripOptionPrefix(option) {
+  return String(option).replace(/^[A-E]\)\s*/i, "");
+}
+
+function relabelOptions(options) {
+  return options.map((option, index) => `${OPTION_PREFIXES[index]} ${stripOptionPrefix(option)}`);
+}
+
+export function distributeCorrectOption(question, index) {
+  if (!Array.isArray(question.options) || question.options.length !== 5) {
+    return question;
+  }
+
+  const targetIndex = CORRECT_INDEX_SEQUENCE[index % CORRECT_INDEX_SEQUENCE.length];
+  const entries = question.options.map((text, optionIndex) => ({
+    text,
+    isCorrect: optionIndex === question.correctIndex
+  }));
+  const correctEntry = entries.find(entry => entry.isCorrect) || entries[question.correctIndex] || entries[0];
+  const wrongEntries = entries.filter(entry => entry !== correctEntry);
+  const nextEntries = [];
+  let wrongIndex = 0;
+
+  for (let optionIndex = 0; optionIndex < entries.length; optionIndex += 1) {
+    nextEntries[optionIndex] = optionIndex === targetIndex
+      ? correctEntry
+      : wrongEntries[wrongIndex++];
+  }
+
+  return {
+    ...question,
+    options: relabelOptions(nextEntries.map(entry => entry.text)),
+    correctIndex: targetIndex
+  };
+}
+
 export function updateUser(body) {
   const user = state.user;
 
@@ -241,8 +280,7 @@ export function buildSolveFallback(exerciseContext = "") {
 }
 
 export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo") {
-  return {
-    questions: [
+  const baseQuestions = [
       {
         subject,
         question: `(ENEM adaptada) Ao estudar ${topic} em ${subject}, qual procedimento ajuda mais a acertar uma questao contextualizada?`,
@@ -254,7 +292,7 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
           "E) Ignorar unidades e restricoes."
         ],
         correctIndex: 2,
-        explanation: "A alternativa C mostra o metodo mais seguro para vestibulares: conceito, dados e verificacao.",
+        explanation: "A alternativa correta mostra o metodo mais seguro para vestibulares: conceito, dados e verificacao.",
         origin: "Questao autoral adaptada",
         exam: "Modelo de treino",
         year: "adaptado",
@@ -299,8 +337,49 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
         sourceUrl: "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos",
         isRealQuestion: false,
         adaptedFrom: "Estilo ENEM e vestibulares anteriores"
+      },
+      {
+        subject,
+        question: `Durante uma prova sobre ${topic}, o aluno percebe que duas alternativas parecem parecidas. Qual criterio ajuda mais a decidir?`,
+        options: [
+          "A) Marcar a alternativa com mais palavras tecnicas.",
+          "B) Escolher a opcao que repete uma palavra do enunciado.",
+          "C) Ignorar o texto de apoio e usar memoria solta.",
+          "D) Comparar cada alternativa com o comando da questao e eliminar exageros ou contradicoes.",
+          "E) Responder pela primeira impressao."
+        ],
+        correctIndex: 3,
+        explanation: "Comparar alternativas com o comando reduz pegadinhas, exageros e contradicoes comuns em vestibulares.",
+        origin: "Questao autoral adaptada",
+        exam: "Modelo de treino",
+        year: "adaptado",
+        sourceUrl: "https://www.fuvest.br/acervo-vestibular/",
+        isRealQuestion: false,
+        adaptedFrom: "Estilo FUVEST e vestibulares anteriores"
+      },
+      {
+        subject,
+        question: `Para consolidar ${topic} depois de um erro no simulado, qual acao transforma melhor o erro em aprendizado?`,
+        options: [
+          "A) Apagar a questao errada para nao rever.",
+          "B) Refazer apenas a alternativa correta.",
+          "C) Copiar o gabarito sem entender.",
+          "D) Trocar imediatamente de materia.",
+          "E) Registrar o motivo do erro, revisar o conceito e resolver uma questao parecida."
+        ],
+        correctIndex: 4,
+        explanation: "O ciclo erro, revisao e nova pratica ajuda o aluno a corrigir a causa do erro, nao apenas memorizar o gabarito.",
+        origin: "Questao autoral adaptada",
+        exam: "Modelo de treino",
+        year: "adaptado",
+        sourceUrl: "https://www.comvest.unicamp.br/vestibulares-anteriores/",
+        isRealQuestion: false,
+        adaptedFrom: "Estilo UNICAMP e vestibulares anteriores"
       }
-    ]
+  ];
+
+  return {
+    questions: baseQuestions.map(distributeCorrectOption)
   };
 }
 
