@@ -56,6 +56,7 @@ export interface PracticeQuestion {
   complexity?: string;
   exam?: string;
   year?: string | number;
+  appliedDate?: string;
   sourceUrl?: string;
   isRealQuestion?: boolean;
   adaptedFrom?: string;

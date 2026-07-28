@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { UserProfile, PracticeQuestion } from "../types";
-import { buildLocalSimulado } from "../lib/simuladoFallbacks";
 import { 
   ClipboardList, 
   Sparkles, 
@@ -36,6 +35,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
   const [submitted, setSubmitted] = useState(false);
   const [scoreCount, setScoreCount] = useState(0);
   const [quizFinished, setQuizFinished] = useState(false);
+  const [generationError, setGenerationError] = useState("");
   
   // Track correct/incorrect per subject for final feedback
   const [subjectPerformance, setSubjectPerformance] = useState<Record<string, { total: number, correct: number }>>({});
@@ -65,7 +65,6 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
 
   const handleGenerateCustomSimulado = () => {
     const subjectsToFetch = selectedSubjects.length > 0 ? selectedSubjects : availableSubjects;
-    const fallbackQuestions = buildLocalSimulado(subjectsToFetch, numQuestions, complexity);
     
     setIsGenerating(true);
     setQuestions([]);
@@ -74,6 +73,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
     setSubmitted(false);
     setScoreCount(0);
     setQuizFinished(false);
+    setGenerationError("");
     setSubjectPerformance({});
 
     fetch("/api/gemini/generate-custom-simulado", {
@@ -90,12 +90,16 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
       return r.json();
     })
     .then(data => {
-      setQuestions(data?.questions?.length ? data.questions : fallbackQuestions);
+      if (data?.questions?.length) {
+        setQuestions(data.questions);
+      } else {
+        setGenerationError(data?.error || "Nao encontrei questoes reais verificadas para montar este simulado agora.");
+      }
       setIsGenerating(false);
     })
     .catch(err => {
       console.error(err);
-      setQuestions(fallbackQuestions);
+      setGenerationError("Falha ao buscar questoes reais de provas anteriores. Tente novamente em instantes.");
       setIsGenerating(false);
     });
   };
@@ -315,6 +319,12 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
 
             </div>
 
+            {generationError && (
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-800 leading-relaxed font-semibold">
+                {generationError}
+              </div>
+            )}
+
             <button
               onClick={handleGenerateCustomSimulado}
               className="w-full bg-indigo-600 hover:bg-indigo-505 font-bold text-xs py-4 rounded-2xl text-white shadow-md shadow-indigo-600/10 transition mt-6 flex items-center justify-center gap-2"
@@ -409,22 +419,15 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
           </div>
 
           <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 font-semibold">
-            <span className={`border px-2.5 py-1 rounded-lg font-bold ${
-              questions[currentIndex].isRealQuestion
-                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
-                : "bg-amber-50 text-amber-700 border-amber-100"
-            }`}>
-              {questions[currentIndex].isRealQuestion ? "Prova real" : "Adaptada"}
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-100 px-2.5 py-1 rounded-lg font-bold">
+              Prova real
             </span>
             <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
               Origem: {questions[currentIndex].origin || questions[currentIndex].exam || "Vestibular"}
-              {questions[currentIndex].year ? ` - ${questions[currentIndex].year}` : ""}
             </span>
-            {questions[currentIndex].adaptedFrom && (
-              <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
-                Base: {questions[currentIndex].adaptedFrom}
-              </span>
-            )}
+            <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+              Data/Ano: {questions[currentIndex].appliedDate || questions[currentIndex].year || "Nao informado"}
+            </span>
             {questions[currentIndex].sourceUrl && (
               <a
                 href={questions[currentIndex].sourceUrl}
