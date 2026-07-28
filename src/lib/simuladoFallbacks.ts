@@ -29,7 +29,12 @@ export function buildLocalSimulado(
     return {
       subject,
       complexity,
-      origin: "Vestibulares.ai Local",
+      exam: "Modelo de treino",
+      year: "adaptado",
+      sourceUrl: "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos",
+      isRealQuestion: false,
+      adaptedFrom: "Estilo ENEM e vestibulares anteriores",
+      origin: "Questao autoral adaptada",
       correctIndex: 2,
       question: `(ENEM adaptada) Em uma rotina de preparacao para vestibular, o aluno revisou ${topic} em ${subject}. Qual estrategia e mais adequada para resolver uma questao de nivel ${complexity} sobre esse conteudo?`,
       options: [

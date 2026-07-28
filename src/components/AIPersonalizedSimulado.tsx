@@ -408,6 +408,35 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
             <span className="text-xs text-slate-500 font-medium">Questões acertadas: {scoreCount}</span>
           </div>
 
+          <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-500 font-semibold">
+            <span className={`border px-2.5 py-1 rounded-lg font-bold ${
+              questions[currentIndex].isRealQuestion
+                ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+                : "bg-amber-50 text-amber-700 border-amber-100"
+            }`}>
+              {questions[currentIndex].isRealQuestion ? "Prova real" : "Adaptada"}
+            </span>
+            <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+              Origem: {questions[currentIndex].origin || questions[currentIndex].exam || "Vestibular"}
+              {questions[currentIndex].year ? ` - ${questions[currentIndex].year}` : ""}
+            </span>
+            {questions[currentIndex].adaptedFrom && (
+              <span className="bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+                Base: {questions[currentIndex].adaptedFrom}
+              </span>
+            )}
+            {questions[currentIndex].sourceUrl && (
+              <a
+                href={questions[currentIndex].sourceUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="bg-indigo-50 border border-indigo-100 text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-100"
+              >
+                Fonte oficial
+              </a>
+            )}
+          </div>
+
           {/* Active Question Context */}
           <div className="bg-slate-55/80 border border-slate-200 p-5 rounded-2xl text-sm leading-relaxed text-slate-800 font-medium whitespace-pre-wrap font-sans">
             {questions[currentIndex].question}

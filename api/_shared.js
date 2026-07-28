@@ -224,7 +224,12 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
         ],
         correctIndex: 2,
         explanation: "A alternativa C mostra o metodo mais seguro para vestibulares: conceito, dados e verificacao.",
-        origin: "Vestibular IA"
+        origin: "Questao autoral adaptada",
+        exam: "Modelo de treino",
+        year: "adaptado",
+        sourceUrl: "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos",
+        isRealQuestion: false,
+        adaptedFrom: "Estilo ENEM e vestibulares anteriores"
       },
       {
         subject,
@@ -238,7 +243,12 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
         ],
         correctIndex: 1,
         explanation: "Pratica ativa com correcao de erros consolida o conteudo e mostra lacunas reais.",
-        origin: "Vestibular IA"
+        origin: "Questao autoral adaptada",
+        exam: "Modelo de treino",
+        year: "adaptado",
+        sourceUrl: "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos",
+        isRealQuestion: false,
+        adaptedFrom: "Estilo ENEM e vestibulares anteriores"
       },
       {
         subject,
@@ -252,7 +262,12 @@ export function buildPracticeQuestions(subject = "Matematica", topic = "conteudo
         ],
         correctIndex: 2,
         explanation: "O verbo de comando revela o que a banca pede e evita perda de tempo com distratores.",
-        origin: "Vestibular IA"
+        origin: "Questao autoral adaptada",
+        exam: "Modelo de treino",
+        year: "adaptado",
+        sourceUrl: "https://www.gov.br/inep/pt-br/areas-de-atuacao/avaliacao-e-exames-educacionais/enem/provas-e-gabaritos",
+        isRealQuestion: false,
+        adaptedFrom: "Estilo ENEM e vestibulares anteriores"
       }
     ]
   };

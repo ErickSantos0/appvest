@@ -54,6 +54,11 @@ export interface FeedPost {
 export interface PracticeQuestion {
   subject?: string;
   complexity?: string;
+  exam?: string;
+  year?: string | number;
+  sourceUrl?: string;
+  isRealQuestion?: boolean;
+  adaptedFrom?: string;
   question: string;
   options: string[];
   correctIndex: number;
