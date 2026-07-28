@@ -1,4 +1,4 @@
-const MODEL = "gemini-3.5-flash";
+const MODEL = "gemini-2.5-flash";
 
 function createInitialState() {
   return {
@@ -120,6 +120,16 @@ export function parseJsonOrFallback(text, fallback) {
   try {
     return JSON.parse(text);
   } catch {
+    const firstBrace = text.indexOf("{");
+    const lastBrace = text.lastIndexOf("}");
+    if (firstBrace >= 0 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(text.slice(firstBrace, lastBrace + 1));
+      } catch {
+        return fallback;
+      }
+    }
+
     return fallback;
   }
 }
