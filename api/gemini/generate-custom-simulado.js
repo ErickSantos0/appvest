@@ -15,12 +15,7 @@ export default async function handler(req, res) {
     complexity: complexity || "Medio"
   }));
 
-  try {
-    if (!isAIAvailable()) {
-      return res.status(200).json(fallback);
-    }
-
-    const prompt = `Gere um simulado personalizado em portugues com exatamente ${amount} questoes.
+  const prompt = `Gere um simulado personalizado em portugues com exatamente ${amount} questoes.
 Materias: ${chosen.join(", ")}.
 Nivel: ${complexity || "Medio"}.
 
@@ -39,6 +34,11 @@ Regra principal:
 
 Retorne somente JSON valido no formato:
 {"questions":[{"subject":"Matematica","exam":"ENEM","year":2023,"sourceUrl":"https://...","isRealQuestion":true,"adaptedFrom":"","question":"...","options":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correctIndex":0,"explanation":"...","origin":"ENEM 2023","complexity":"${complexity || "Medio"}"}]}`;
+
+  try {
+    if (!isAIAvailable()) {
+      return res.status(200).json(fallback);
+    }
 
     const text = await generateText(prompt, true, 0.5, true);
     return res.status(200).json(parseJsonOrFallback(text, fallback));
