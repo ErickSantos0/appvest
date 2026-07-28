@@ -274,7 +274,7 @@ export default function AIPersonalizedSimulado({ user, onUpdateUser, onNavigateT
                           : "bg-slate-50 border-slate-150 text-slate-600 hover:bg-slate-100"
                       }`}
                     >
-                      {val} Exercícios
+                      {val} Questões
                     </button>
                   ))}
                 </div>
