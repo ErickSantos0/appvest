@@ -80,7 +80,7 @@ export function isAIAvailable() {
   return Boolean(process.env.GEMINI_API_KEY);
 }
 
-export async function generateText(prompt, json = false, temperature = 0.5) {
+export async function generateText(prompt, json = false, temperature = 0.5, useGoogleSearch = false) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not configured");
@@ -96,7 +96,8 @@ export async function generateText(prompt, json = false, temperature = 0.5) {
         generationConfig: {
           temperature,
           ...(json ? { responseMimeType: "application/json" } : {})
-        }
+        },
+        ...(useGoogleSearch ? { tools: [{ google_search: {} }] } : {})
       })
     }
   );

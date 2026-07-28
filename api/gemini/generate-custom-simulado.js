@@ -38,7 +38,7 @@ Regra principal:
 Retorne somente JSON valido no formato:
 {"questions":[{"subject":"Matematica","exam":"ENEM","year":2023,"sourceUrl":"https://...","isRealQuestion":true,"adaptedFrom":"","question":"...","options":["A) ...","B) ...","C) ...","D) ...","E) ..."],"correctIndex":0,"explanation":"...","origin":"ENEM 2023","complexity":"${complexity || "Medio"}"}]}`;
 
-    const text = await generateText(prompt, true, 0.5);
+    const text = await generateText(prompt, true, 0.5, true);
     return res.status(200).json(parseJsonOrFallback(text, fallback));
   } catch {
     return res.status(200).json(fallback);
